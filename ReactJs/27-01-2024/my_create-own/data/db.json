@@ -1,0 +1,19 @@
+ {
+    "items":[
+      {
+        "id":1,
+        "checked":true,
+        "item":"Practice coding"
+      },
+      {
+        "id":2,
+        "checked":false,
+        "item":"Play Cricket"
+      },
+      {
+        "id":3,
+        "checked":false,
+        "item":"Read about AI"
+      }
+    ]
+}

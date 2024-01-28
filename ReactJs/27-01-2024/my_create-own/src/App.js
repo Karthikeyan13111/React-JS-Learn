@@ -1,39 +1,48 @@
 import Header from "../src/Header";
 import Content from "../src/Content";
 import Footer from "../src/Footer";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AddItem from "./AddItem";
 import SearchItem from "./SearchItem";
 
 function App() {
-  const [items,setItems]=useState(JSON.parse(
-    localStorage.getItem('todo_list')
-  )
-    // [
-    //   {
-    //     id:1,
-    //     checked:true,
-    //     item:"Practice coding"
-    //   },
-    //   {
-    //     id:2,
-    //     checked:false,
-    //     item:"Play Cricket"
-    //   },
-    //   {
-    //     id:3,
-    //     checked:false,
-    //     item:"Read about AI"
-    //   }
-    // ]
-    );
-
+  const API_URL='http://localhost:3500/itemss';
+  const [items,setItems]=useState([]);
     const [newItem,setNewItem]=useState('')
     const [search,setSearch]=useState('')
+    const [fetchError,setfetchError]=useState(null)
+    const [isLoading,setisLoading]=useState(true)
+
+
+    useEffect(
+     ()=>{
+        // JSON.parse(
+        //   localStorage.getItem('todo_list'))
+        const fetchItems= async()=>{
+          try {
+            const response= await fetch(API_URL);
+            if (!response.ok) {
+              throw Error("Data Not Recived");
+            }
+            const listtems= await response.json();
+            setItems(listtems);
+            setfetchError(null)
+          } catch (error) {
+            // console.log(error.message)
+            setfetchError(error.message)
+          } finally{
+            setisLoading(false);
+          }
+        }
+        setTimeout(() => {
+        (async ()=> await fetchItems())()
+        }, 2000);
+      },[]
+    )
     
     function setCommonItems(listItems){
       setItems(listItems);
-      localStorage.setItem("todo_list",JSON.stringify(listItems));
+      //localStorage.setItem("todo_list",JSON.stringify(listItems));
     }
 
     const addItem=(item)=>{
@@ -68,7 +77,7 @@ function App() {
 
   return (
     <div className="App">
-      <Header title="Karthikeyan To Do List"/>
+      <Header title="Course List"/>
 
       <AddItem 
       newItem={newItem}
@@ -79,12 +88,19 @@ function App() {
       search={search}
       setSearch={setSearch}
       />
-
-      <Content 
+<main>
+  {isLoading && <p>{`Loading Items...`}</p>}
+  {fetchError && <p>{`Error: ${fetchError}`}</p>}
+  {!isLoading && !fetchError &&
+    <Content 
       items={items.filter(item=>((item.item).toLowerCase()).includes(search.toLowerCase()))}
       handleCheck={handleCheck}
       handleDelete={handleDelete}
       />
+  }
+
+</main>
+      
 
       <Footer length={items.length}/>
     </div>
